@@ -1,0 +1,44 @@
+package {{apiPackage}}
+
+{{#imports}}import {{import}}
+{{/imports}}import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.request
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.contentType
+import io.ktor.http.encodedPath
+import io.ktor.http.takeFrom
+
+class {{classname}}(
+    private val httpClient: HttpClient,
+    private val baseUrl: String = "",
+) {
+{{#operation}}
+    suspend fun {{operationId}}({{#allParams}}{{paramName}}: {{{dataType}}}{{^required}}? = null{{/required}}{{^-last}}, {{/-last}}{{/allParams}}): {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Unit{{/returnType}} {
+        val request = HttpRequestBuilder().apply {
+            method = HttpMethod.{{httpMethod}}
+            url {
+                if (baseUrl.isNotBlank()) takeFrom(baseUrl)
+                encodedPath = "/{{path}}"
+                {{#queryParams}}
+                {{#isContainer}}{{paramName}}?.forEach { parameters.append("{{baseName}}", it.toString()) }{{/isContainer}}
+                {{^isContainer}}{{paramName}}?.let { parameters.append("{{baseName}}", it.toString()) }{{/isContainer}}
+                {{/queryParams}}
+            }
+            {{#headerParams}}
+            {{paramName}}?.let { headers.append("{{baseName}}", it.toString()) }
+            {{/headerParams}}
+            {{#bodyParams}}
+            contentType(ContentType.Application.Json)
+            setBody({{paramName}})
+            {{/bodyParams}}
+        }
+        {{#returnType}}return httpClient.request(request).body(){{/returnType}}
+        {{^returnType}}httpClient.request(request){{/returnType}}
+    }
+
+{{/operation}}
+}
