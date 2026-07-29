@@ -11,17 +11,32 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.takeFrom
+{{#useHilt}}
+import javax.inject.Inject
+import javax.inject.Singleton
+{{/useHilt}}
 
+{{#useHilt}}
+@Singleton
+class {{classname}} @Inject constructor(
+    private val httpClient: HttpClient,
+) {
+{{/useHilt}}
+{{^useHilt}}
 class {{classname}}(
     private val httpClient: HttpClient,
-    private val baseUrl: String = "",
+    private val baseUrl: String = BASE_URL,
 ) {
+{{/useHilt}}
+    private companion object {
+        const val BASE_URL = "{{{basePath}}}"
+    }
 {{#operation}}
     suspend fun {{operationId}}({{#allParams}}{{paramName}}: {{{dataType}}}{{^required}}? = null{{/required}}{{^-last}}, {{/-last}}{{/allParams}}): {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Unit{{/returnType}} {
         val request = HttpRequestBuilder().apply {
             method = HttpMethod.{{httpMethod}}
             url {
-                if (baseUrl.isNotBlank()) takeFrom(baseUrl)
+                takeFrom({{#useHilt}}BASE_URL{{/useHilt}}{{^useHilt}}baseUrl{{/useHilt}})
                 encodedPath = "/{{path}}"
                 {{#queryParams}}
                 {{#isContainer}}{{paramName}}?.forEach { parameters.append("{{baseName}}", it.toString()) }{{/isContainer}}

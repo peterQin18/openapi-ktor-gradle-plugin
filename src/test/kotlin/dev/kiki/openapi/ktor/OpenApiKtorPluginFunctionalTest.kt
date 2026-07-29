@@ -36,6 +36,8 @@ class OpenApiKtorPluginFunctionalTest {
             info:
               title: Sample
               version: 1.0.0
+            servers:
+              - url: https://api.example.com
             paths:
               /greetings/{id}:
                 get:
@@ -71,7 +73,11 @@ class OpenApiKtorPluginFunctionalTest {
 
         assertTrue(result.output.contains("BUILD SUCCESSFUL"))
         val output = projectDir.resolve("build/generated/openapi/sample/src/main/kotlin/com/example/generated")
-        assertTrue(output.resolve("api/GreetingApi.kt").isFile)
+        val apiFile = output.resolve("api/GreetingApi.kt")
+        assertTrue(apiFile.isFile)
         assertTrue(output.resolve("model/Greeting.kt").isFile)
+        assertTrue(apiFile.readText().contains("@Singleton"))
+        assertTrue(apiFile.readText().contains("@Inject constructor"))
+        assertTrue(apiFile.readText().contains("const val BASE_URL"))
     }
 }

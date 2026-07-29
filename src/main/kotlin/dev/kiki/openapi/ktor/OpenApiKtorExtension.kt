@@ -25,6 +25,8 @@ open class OpenApiKtorSpec internal constructor(
     val packageName: Property<String> = objects.property(String::class.java)
     val includeTags: SetProperty<String> = objects.setProperty(String::class.java).convention(emptySet())
     val validateSpec: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+    /** Generates `@Singleton` and `@Inject` API constructors for Hilt/Dagger. */
+    val useHilt: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
     override fun getName(): String = specName
 }

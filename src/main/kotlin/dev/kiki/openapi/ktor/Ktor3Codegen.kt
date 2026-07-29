@@ -39,6 +39,11 @@ class Ktor3Codegen : AbstractKotlinCodegen() {
 
     override fun getHelp(): String = "Generates Kotlin serializable models and Ktor suspend APIs."
 
+    override fun processOpts() {
+        super.processOpts()
+        additionalProperties["useHilt"] = additionalProperties["useHilt"]?.toString()?.toBooleanStrictOrNull() ?: true
+    }
+
     override fun preprocessOpenAPI(openAPI: OpenAPI) {
         super.preprocessOpenAPI(openAPI)
         val tags = (additionalProperties["includeTags"] as? String)

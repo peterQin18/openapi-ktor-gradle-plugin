@@ -39,6 +39,7 @@ class OpenApiKtorPlugin : Plugin<Project> {
                     task.invokerPackage.set(spec.packageName.map { "$it.core" })
                     task.validateSpec.set(spec.validateSpec)
                     task.additionalProperties.put("includeTags", spec.includeTags.map { it.joinToString(",") })
+                    task.additionalProperties.put("useHilt", spec.useHilt.map(Boolean::toString))
                 }
                 aggregate.configure { task -> task.dependsOn(generateTask) }
                 registerGeneratedSources(project, output, generateTask)

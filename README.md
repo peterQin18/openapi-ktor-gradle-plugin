@@ -21,6 +21,7 @@ openApiKtor {
         packageName.set("com.example.generated.quests")
         includeTags.set(setOf("Quest")) // 可选：只生成指定 tag
         validateSpec.set(true)
+        useHilt.set(true) // 默认 true：生成 @Singleton + @Inject constructor
     }
 }
 ```
@@ -44,14 +45,28 @@ Android application/library 或 Kotlin JVM 编译任务会依赖对应生成任�
 
 ## 使用生成的 API
 
-生成的 API 接收 `HttpClient` 和可选 `baseUrl`。如果不传 `baseUrl`，请通过 Ktor 的 `DefaultRequest` 配置基地址。
+默认会从 OpenAPI `servers`/`basePath` 生成 `BASE_URL`，并生成可直接由 Hilt/Dagger 构造的 API：
 
 ```kotlin
-val api = QuestApi(httpClient, baseUrl = "https://api.example.com")
-val response = api.getQuest(id = "42")
+@Singleton
+class QuestApi @Inject constructor(
+    private val httpClient: HttpClient,
+)
 ```
 
-Hilt 是可选的：在你的 `NetworkModule` 中提供 `HttpClient`，再手写需要的 API/Repository binding。不要把业务 Repository 交给 OpenAPI Generator 生成。
+因此只要你的 `NetworkModule` 已提供 `HttpClient`，生成的 API 会自动进入 Hilt 图。插件仍不生成业务 Repository、Hilt `@Module` 或 DTO → UI Mapper。
+
+非 Hilt 项目可关闭注入代码：
+
+```kotlin
+openApiKtor {
+    spec("quests") {
+        useHilt.set(false)
+    }
+}
+```
+
+关闭后生成的 API 接收 `HttpClient` 和可选 `baseUrl` 构造参数。
 
 ## 本地开发
 
