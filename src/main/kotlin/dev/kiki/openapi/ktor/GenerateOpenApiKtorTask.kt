@@ -1,4 +1,4 @@
-package io.github.peterqin.openapi.ktor
+package dev.kiki.openapi.ktor
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty

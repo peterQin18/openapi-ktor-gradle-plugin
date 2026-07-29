@@ -7,7 +7,7 @@ plugins {
     id("com.gradle.plugin-publish") version "2.0.0"
 }
 
-group = "io.github.peterqin"
+group = "dev.kiki"
 version = providers.gradleProperty("version").orElse("0.1.0-SNAPSHOT").get()
 
 java {
@@ -42,8 +42,8 @@ gradlePlugin {
 
     plugins {
         create("openApiKtor") {
-            id = "io.github.peterqin.openapi-ktor"
-            implementationClass = "io.github.peterqin.openapi.ktor.OpenApiKtorPlugin"
+            id = "dev.kiki.openapi-ktor"
+            implementationClass = "dev.kiki.openapi.ktor.OpenApiKtorPlugin"
             displayName = "OpenAPI Ktor Generator"
             description = "Generates Kotlin serializable models and Ktor suspend APIs from OpenAPI specifications."
             tags.set(listOf("openapi", "kotlin", "ktor", "android", "codegen"))

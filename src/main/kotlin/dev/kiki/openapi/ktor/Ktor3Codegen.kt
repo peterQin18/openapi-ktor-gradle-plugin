@@ -1,4 +1,4 @@
-package io.github.peterqin.openapi.ktor
+package dev.kiki.openapi.ktor
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
@@ -13,7 +13,7 @@ import org.openapitools.codegen.languages.AbstractKotlinCodegen
 class Ktor3Codegen : AbstractKotlinCodegen() {
     init {
         artifactId = "kotlin-ktor-client"
-        packageName = "io.github.peterqin.openapi.generated"
+        packageName = "dev.kiki.openapi.generated"
         apiPackage = "$packageName.api"
         modelPackage = "$packageName.model"
         embeddedTemplateDir = "kotlin-ktor3"

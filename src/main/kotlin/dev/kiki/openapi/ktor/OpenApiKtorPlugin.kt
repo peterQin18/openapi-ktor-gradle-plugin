@@ -1,4 +1,4 @@
-package io.github.peterqin.openapi.ktor
+package dev.kiki.openapi.ktor
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension

@@ -8,7 +8,7 @@
 
 ```kotlin
 plugins {
-    id("io.github.peterqin.openapi-ktor") version "0.1.0"
+    id("dev.kiki.openapi-ktor") version "0.1.0"
 }
 ```
 

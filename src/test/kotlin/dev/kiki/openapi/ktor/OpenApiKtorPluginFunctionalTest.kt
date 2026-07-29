@@ -1,4 +1,4 @@
-package io.github.peterqin.openapi.ktor
+package dev.kiki.openapi.ktor
 
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.io.TempDir
@@ -16,7 +16,7 @@ class OpenApiKtorPluginFunctionalTest {
         projectDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("io.github.peterqin.openapi-ktor")
+                id("dev.kiki.openapi-ktor")
                 kotlin("jvm") version "2.2.10"
             }
 
