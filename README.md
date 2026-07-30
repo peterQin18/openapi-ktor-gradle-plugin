@@ -1,39 +1,59 @@
 # OpenAPI Ktor Gradle Plugin
 
-从 OpenAPI 3 规范生成 **Kotlin `@Serializable` Model** 与 **Ktor `suspend` API** 的 Gradle Plugin。它不生成业务 Repository、Hilt Module 或 DTO → UI Mapper；这些属于应用的业务层，应保持手写。
+Generates Kotlin `@Serializable` models and Ktor `suspend` APIs from OpenAPI 3 specifications. The plugin intentionally does **not** generate repositories, dependency-injection modules, or UI mappers; those are application-specific code.
 
-## 安装
+## Requirements
 
-发布到 Gradle Plugin Portal 后：
+- Gradle 8.11 or later
+- JDK 17
+- Kotlin JVM or Android project
+- An OpenAPI 3 specification in YAML or JSON
+
+## Installation
+
+After the plugin is accepted by the Gradle Plugin Portal, apply it in the module that owns the generated source set:
 
 ```kotlin
 plugins {
-    id("dev.kiki.openapi-ktor") version "0.1.0"
+    id("io.github.peterqin18.openapi-ktor") version "0.1.0"
 }
 ```
 
-## 配置
+The generated source uses Ktor and Kotlin Serialization. Add compatible versions of these dependencies to the consuming module:
+
+```kotlin
+dependencies {
+    implementation("io.ktor:ktor-client-core:<ktor-version>")
+    implementation("io.ktor:ktor-client-content-negotiation:<ktor-version>")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:<ktor-version>")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:<serialization-version>")
+}
+```
+
+When `useHilt` is `true` (the default), also configure Hilt or Dagger so that `javax.inject.Inject` and `javax.inject.Singleton` are available, and provide a `HttpClient` binding. Set `useHilt` to `false` if the project does not use Hilt/Dagger.
+
+## Configuration
 
 ```kotlin
 openApiKtor {
     spec("quests") {
         inputSpec.set(layout.projectDirectory.file("src/main/openapi/quests.yaml"))
         packageName.set("com.example.generated.quests")
-        includeTags.set(setOf("Quest")) // 可选：只生成指定 tag
+        includeTags.set(setOf("Quest")) // Optional: generate selected tags only.
         validateSpec.set(true)
-        useHilt.set(true) // 默认 true：生成 @Singleton + @Inject constructor
+        useHilt.set(true) // Default: API classes use @Inject and @Singleton.
     }
 }
 ```
 
-运行：
+Run either the aggregate task or a task for one named specification:
 
 ```bash
 ./gradlew generateOpenApiKtor
 ./gradlew generateQuestsOpenApiKtor
 ```
 
-生成目录：
+Generated files are written to:
 
 ```text
 build/generated/openapi/quests/src/main/kotlin/
@@ -41,11 +61,11 @@ build/generated/openapi/quests/src/main/kotlin/
 └── com/example/generated/quests/model/
 ```
 
-Android application/library 或 Kotlin JVM 编译任务会依赖对应生成任务，并包含上述目录。生成目录应加入 `.gitignore`，而不是提交到 Git。
+The plugin adds this directory to Kotlin and Android source sets and makes compilation depend on generation. Do not commit the generated directory.
 
-## 使用生成的 API
+## Generated API usage
 
-默认会从 OpenAPI `servers`/`basePath` 生成 `BASE_URL`，并生成可直接由 Hilt/Dagger 构造的 API：
+By default, the OpenAPI `servers` / `basePath` value becomes `BASE_URL`. With Hilt enabled, a generated API looks like this:
 
 ```kotlin
 @Singleton
@@ -54,30 +74,22 @@ class QuestApi @Inject constructor(
 )
 ```
 
-因此只要你的 `NetworkModule` 已提供 `HttpClient`，生成的 API 会自动进入 Hilt 图。插件仍不生成业务 Repository、Hilt `@Module` 或 DTO → UI Mapper。
+Your application must provide the `HttpClient`; the plugin does not create a network module or repositories. With `useHilt.set(false)`, generated APIs instead accept `HttpClient` and an optional `baseUrl` constructor parameter.
 
-非 Hilt 项目可关闭注入代码：
-
-```kotlin
-openApiKtor {
-    spec("quests") {
-        useHilt.set(false)
-    }
-}
-```
-
-关闭后生成的 API 接收 `HttpClient` 和可选 `baseUrl` 构造参数。
-
-## 本地开发
+## Publishing and local development
 
 ```bash
 ./gradlew test
 ./gradlew publishToMavenLocal
-./gradlew publishPlugins --validate-only
+./gradlew publishPlugins -Pversion=0.1.0
 ```
 
-发布到 Plugin Portal 需要配置 `GRADLE_PUBLISH_KEY` 和 `GRADLE_PUBLISH_SECRET`，仅通过 GitHub Actions Secret 注入；不要提交密钥。
+The Gradle Plugin Portal accepts final versions only: do not publish a version ending in `-SNAPSHOT`. Publishing requires `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` through local environment variables or CI secrets; never commit them.
 
-## 许可
+## Configuration Cache
+
+This release declares Configuration Cache as unsupported. The plugin currently registers generator tasks after project evaluation; regular builds work normally, but consumers should not enable Configuration Cache for this plugin yet.
+
+## License
 
 [MIT](LICENSE)
