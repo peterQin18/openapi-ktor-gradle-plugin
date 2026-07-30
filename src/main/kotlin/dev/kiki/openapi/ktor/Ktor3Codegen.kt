@@ -46,7 +46,7 @@ class Ktor3Codegen : AbstractKotlinCodegen() {
 
     override fun preprocessOpenAPI(openAPI: OpenAPI) {
         super.preprocessOpenAPI(openAPI)
-        val tags = (additionalProperties["includeTags"] as? String)
+        val tags = (additionalProperties["openApiKtorIncludeTags"] as? String)
             ?.split(',')?.filter(String::isNotBlank)?.toSet().orEmpty()
         if (tags.isNotEmpty()) filterPaths(openAPI.paths, tags)
     }
@@ -66,12 +66,15 @@ class Ktor3Codegen : AbstractKotlinCodegen() {
     }
 
     private fun filterPaths(paths: Paths?, tags: Set<String>) {
+        fun keep(operation: Operation?): Boolean =
+            operation?.tags.orEmpty().any(tags::contains)
+
         paths?.forEach { (_, item) ->
-            if (item.get?.tags?.none(tags::contains) != false) item.get = null
-            if (item.post?.tags?.none(tags::contains) != false) item.post = null
-            if (item.put?.tags?.none(tags::contains) != false) item.put = null
-            if (item.delete?.tags?.none(tags::contains) != false) item.delete = null
-            if (item.patch?.tags?.none(tags::contains) != false) item.patch = null
+            if (!keep(item.get)) item.get = null
+            if (!keep(item.post)) item.post = null
+            if (!keep(item.put)) item.put = null
+            if (!keep(item.delete)) item.delete = null
+            if (!keep(item.patch)) item.patch = null
         }
     }
 }
