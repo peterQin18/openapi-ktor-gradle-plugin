@@ -1,13 +1,14 @@
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.plugin.compatibility.compatibility
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
     kotlin("jvm") version "2.2.10"
-    id("com.gradle.plugin-publish") version "2.0.0"
+    id("com.gradle.plugin-publish") version "2.1.1"
 }
 
-group = "dev.kiki"
+group = "io.github.peterqin18"
 version = providers.gradleProperty("version").orElse("0.1.0-SNAPSHOT").get()
 
 java {
@@ -42,11 +43,18 @@ gradlePlugin {
 
     plugins {
         create("openApiKtor") {
-            id = "dev.kiki.openapi-ktor"
+            id = "io.github.peterqin18.openapi-ktor"
             implementationClass = "dev.kiki.openapi.ktor.OpenApiKtorPlugin"
             displayName = "OpenAPI Ktor Generator"
             description = "Generates Kotlin serializable models and Ktor suspend APIs from OpenAPI specifications."
             tags.set(listOf("openapi", "kotlin", "ktor", "android", "codegen"))
+            compatibility {
+                features {
+                    // Task registration currently uses afterEvaluate, so this plugin does not
+                    // yet support Gradle's configuration cache in consumer projects.
+                    configurationCache = false
+                }
+            }
         }
     }
 }

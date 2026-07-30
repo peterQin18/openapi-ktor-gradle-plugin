@@ -11,21 +11,27 @@ class OpenApiKtorPluginFunctionalTest {
     lateinit var projectDir: File
 
     @Test
-    fun `generates Ktor api and serializable model`() {
+    fun `generates Ktor api and serializable model that compiles`() {
         projectDir.resolve("settings.gradle.kts").writeText("rootProject.name = \"functional-test\"")
         projectDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("dev.kiki.openapi-ktor")
+                id("io.github.peterqin18.openapi-ktor")
                 kotlin("jvm") version "2.2.10"
             }
 
             repositories { mavenCentral() }
 
+            dependencies {
+                implementation("io.ktor:ktor-client-core:3.2.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+            }
+
             openApiKtor {
                 spec("sample") {
                     inputSpec.set(layout.projectDirectory.file("openapi.yaml"))
                     packageName.set("com.example.generated")
+                    useHilt.set(false)
                 }
             }
             """.trimIndent(),
@@ -68,7 +74,7 @@ class OpenApiKtorPluginFunctionalTest {
         val result = GradleRunner.create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
-            .withArguments("generateSampleOpenApiKtor", "--stacktrace")
+            .withArguments("compileKotlin", "--stacktrace")
             .build()
 
         assertTrue(result.output.contains("BUILD SUCCESSFUL"))
@@ -76,8 +82,6 @@ class OpenApiKtorPluginFunctionalTest {
         val apiFile = output.resolve("api/GreetingApi.kt")
         assertTrue(apiFile.isFile)
         assertTrue(output.resolve("model/Greeting.kt").isFile)
-        assertTrue(apiFile.readText().contains("@Singleton"))
-        assertTrue(apiFile.readText().contains("@Inject constructor"))
         assertTrue(apiFile.readText().contains("const val BASE_URL"))
     }
 }
