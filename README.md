@@ -1,5 +1,7 @@
 # OpenAPI Ktor Gradle Plugin
 
+[中文说明](README.zh-CN.md)
+
 Generates Kotlin `@Serializable` models and Ktor `suspend` APIs from OpenAPI 3 specifications. The plugin intentionally does **not** generate repositories, dependency-injection modules, or UI mappers; those are application-specific code.
 
 ## Requirements
