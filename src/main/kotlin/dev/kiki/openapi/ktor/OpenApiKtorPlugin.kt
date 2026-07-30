@@ -38,7 +38,9 @@ class OpenApiKtorPlugin : Plugin<Project> {
                     task.modelPackage.set(spec.packageName.map { "$it.model" })
                     task.invokerPackage.set(spec.packageName.map { "$it.core" })
                     task.validateSpec.set(spec.validateSpec)
-                    task.additionalProperties.put("includeTags", spec.includeTags.map { it.joinToString(",") })
+                    // `includeTags` is reserved by OpenAPI Generator and causes it to suppress
+                    // operations. Keep this plugin's filtering option in a private namespace.
+                    task.additionalProperties.put("openApiKtorIncludeTags", spec.includeTags.map { it.joinToString(",") })
                     task.additionalProperties.put("useHilt", spec.useHilt.map(Boolean::toString))
                 }
                 aggregate.configure { task -> task.dependsOn(generateTask) }
