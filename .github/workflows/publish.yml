@@ -4,6 +4,11 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without the v prefix (for example, 0.1.0)"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -19,7 +24,15 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew test publishPlugins
+      - name: Resolve release version
+        id: release
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${INPUT_VERSION:-${GITHUB_REF_NAME#v}}"
+          test -n "$VERSION"
+          printf "value=%s\n" "$VERSION" >> "$GITHUB_OUTPUT"
+      - run: ./gradlew test check publishPlugins -Pversion=${{ steps.release.outputs.value }}
         env:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
