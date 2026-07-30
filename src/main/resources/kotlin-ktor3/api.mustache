@@ -31,6 +31,7 @@ class {{classname}}(
     private companion object {
         const val BASE_URL = "{{{basePath}}}"
     }
+{{#operations}}
 {{#operation}}
     suspend fun {{operationId}}({{#allParams}}{{paramName}}: {{{dataType}}}{{^required}}? = null{{/required}}{{^-last}}, {{/-last}}{{/allParams}}): {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Unit{{/returnType}} {
         val request = HttpRequestBuilder().apply {
@@ -56,4 +57,5 @@ class {{classname}}(
     }
 
 {{/operation}}
+{{/operations}}
 }
