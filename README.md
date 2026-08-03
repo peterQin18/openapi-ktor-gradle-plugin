@@ -1,5 +1,10 @@
 # OpenAPI Ktor Gradle Plugin
 
+[![Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.peterqin18.openapi-ktor?label=Plugin%20Portal)](https://plugins.gradle.org/plugin/io.github.peterqin18.openapi-ktor)
+[![Sonar Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=peterQin18_openapi-ktor-gradle-plugin&metric=alert_status)](https://sonarcloud.io/summary/overall?id=peterQin18_openapi-ktor-gradle-plugin)
+[![Sonar Coverage](https://sonarcloud.io/api/project_badges/measure?project=peterQin18_openapi-ktor-gradle-plugin&metric=coverage)](https://sonarcloud.io/summary/overall?id=peterQin18_openapi-ktor-gradle-plugin)
+[![License](https://img.shields.io/github/license/peterQin18/openapi-ktor-gradle-plugin)](LICENSE)
+
 [中文说明](README.zh-CN.md)
 
 Generates Kotlin `@Serializable` models and Ktor `suspend` APIs from OpenAPI 3 specifications. The plugin intentionally does **not** generate repositories, dependency-injection modules, or UI mappers; those are application-specific code.
