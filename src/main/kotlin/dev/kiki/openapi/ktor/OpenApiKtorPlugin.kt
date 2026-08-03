@@ -41,6 +41,7 @@ class OpenApiKtorPlugin : Plugin<Project> {
                     // `includeTags` is reserved by OpenAPI Generator and causes it to suppress
                     // operations. Keep this plugin's filtering option in a private namespace.
                     task.additionalProperties.put("openApiKtorIncludeTags", spec.includeTags.map { it.joinToString(",") })
+                    task.additionalProperties.put("baseUrlExpression", spec.baseUrlExpression)
                     task.additionalProperties.put("useHilt", spec.useHilt.map(Boolean::toString))
                 }
                 aggregate.configure { task -> task.dependsOn(generateTask) }

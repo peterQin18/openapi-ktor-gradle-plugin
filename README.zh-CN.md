@@ -42,6 +42,8 @@ openApiKtor {
         includeTags.set(setOf("Quest")) // 可选：仅生成指定 Tag
         validateSpec.set(true)
         useHilt.set(true) // 默认：生成 @Inject / @Singleton API
+        // 可选：Kotlin 表达式。Android 通常配置为 BuildConfig 字段。
+        baseUrlExpression.set("com.example.app.BuildConfig.API_BASE_URL")
     }
 }
 ```
@@ -58,6 +60,10 @@ openApiKtor {
 ## 生成结果
 
 例如 OpenAPI 中的 `GET /pets/{id}` 会生成对应的 `suspend` 函数；路径、查询、Header、JSON Body 参数及 GET/POST/PUT/DELETE/PATCH 均受支持。默认 Hilt 模式下 API 通过构造函数接收 `HttpClient`。
+
+默认情况下，OpenAPI 的 `servers` / `basePath` 会成为生成代码中的 `BASE_URL`。Android 需要测试、预发和正式环境时，设置 `baseUrlExpression` 指向 BuildConfig 字段即可；生成 API 会在运行时采用该表达式的值，而不是固定使用 Swagger 中的地址。
+
+生成 API 会先检查 HTTP 状态码，再反序列化响应体。非 2xx 响应会抛出生成 API 内嵌的 `ApiHttpException`（例如 `QuestApi.ApiHttpException`），其中包含 `statusCode` 和 `responseBody`。
 
 ## Configuration Cache
 

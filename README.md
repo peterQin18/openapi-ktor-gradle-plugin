@@ -44,6 +44,8 @@ openApiKtor {
         includeTags.set(setOf("Quest")) // Optional: generate selected tags only.
         validateSpec.set(true)
         useHilt.set(true) // Default: API classes use @Inject and @Singleton.
+        // Optional Kotlin expression. In Android, this normally uses BuildConfig.
+        baseUrlExpression.set("com.example.app.BuildConfig.API_BASE_URL")
     }
 }
 ```
@@ -67,7 +69,9 @@ The plugin adds this directory to Kotlin and Android source sets and makes compi
 
 ## Generated API usage
 
-By default, the OpenAPI `servers` / `basePath` value becomes `BASE_URL`. With Hilt enabled, a generated API looks like this:
+By default, the OpenAPI `servers` / `basePath` value becomes `BASE_URL`. To use different Android build-variant environments, set `baseUrlExpression` to a Kotlin expression such as `com.example.app.BuildConfig.API_BASE_URL`; the expression is used at runtime instead of the URL embedded in the OpenAPI file.
+
+With Hilt enabled, a generated API looks like this:
 
 ```kotlin
 @Singleton
@@ -77,6 +81,8 @@ class QuestApi @Inject constructor(
 ```
 
 Your application must provide the `HttpClient`; the plugin does not create a network module or repositories. With `useHilt.set(false)`, generated APIs instead accept `HttpClient` and an optional `baseUrl` constructor parameter.
+
+Each generated API checks the response status before deserializing the body. Non-2xx responses throw `ApiHttpException`, nested under the generated API class (for example, `QuestApi.ApiHttpException`), with `statusCode` and `responseBody` properties.
 
 ## Publishing and local development
 

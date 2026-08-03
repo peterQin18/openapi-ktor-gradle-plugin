@@ -3,6 +3,7 @@ package {{apiPackage}}
 {{#imports}}import {{import}}
 {{/imports}}import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.statement.bodyAsText
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -10,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
+import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 {{#useHilt}}
 import javax.inject.Inject
@@ -25,19 +27,27 @@ class {{classname}} @Inject constructor(
 {{^useHilt}}
 class {{classname}}(
     private val httpClient: HttpClient,
-    private val baseUrl: String = BASE_URL,
+    private val baseUrl: String = {{{baseUrlExpression}}},
 ) {
 {{/useHilt}}
     private companion object {
         const val BASE_URL = "{{{basePath}}}"
     }
+{{#useHilt}}
+    private val baseUrl: String = {{{baseUrlExpression}}}
+{{/useHilt}}
+
+    class ApiHttpException(
+        val statusCode: Int,
+        val responseBody: String,
+    ) : RuntimeException("HTTP $statusCode")
 {{#operations}}
 {{#operation}}
     suspend fun {{operationId}}({{#allParams}}{{paramName}}: {{{dataType}}}{{^required}}? = null{{/required}}{{^-last}}, {{/-last}}{{/allParams}}): {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Unit{{/returnType}} {
         val request = HttpRequestBuilder().apply {
             method = HttpMethod.{{httpMethod}}
             url {
-                takeFrom({{#useHilt}}BASE_URL{{/useHilt}}{{^useHilt}}baseUrl{{/useHilt}})
+                takeFrom(baseUrl)
                 encodedPath = "/{{path}}"
                 {{#queryParams}}
                 {{#isContainer}}{{paramName}}?.forEach { parameters.append("{{baseName}}", it.toString()) }{{/isContainer}}
@@ -52,8 +62,14 @@ class {{classname}}(
             setBody({{paramName}})
             {{/bodyParams}}
         }
-        {{#returnType}}return httpClient.request(request).body(){{/returnType}}
-        {{^returnType}}httpClient.request(request){{/returnType}}
+        val response = httpClient.request(request)
+        if (!response.status.isSuccess()) {
+            throw ApiHttpException(
+                statusCode = response.status.value,
+                responseBody = response.bodyAsText(),
+            )
+        }
+        {{#returnType}}return response.body(){{/returnType}}
     }
 
 {{/operation}}

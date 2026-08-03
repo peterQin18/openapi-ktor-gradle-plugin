@@ -25,6 +25,8 @@ open class OpenApiKtorSpec internal constructor(
     val packageName: Property<String> = objects.property(String::class.java)
     val includeTags: SetProperty<String> = objects.setProperty(String::class.java).convention(emptySet())
     val validateSpec: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+    /** Kotlin expression used as the generated client's default base URL. */
+    val baseUrlExpression: Property<String> = objects.property(String::class.java).convention("BASE_URL")
     /** Generates `@Singleton` and `@Inject` API constructors for Hilt/Dagger. */
     val useHilt: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
